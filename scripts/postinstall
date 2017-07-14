@@ -1,0 +1,42 @@
+#!/bin/bash
+
+echo "Running postinstall" > ~/Desktop/postinstall.log
+
+if type -p java; then
+    echo found java executable in PATH >> ~/Desktop/postinstall.log
+    _java=java
+elif [[ -n "$JAVA_HOME" ]] && [[ -x "$JAVA_HOME/bin/java" ]];  then
+    echo found java executable in JAVA_HOME >> ~/Desktop/postinstall.log
+    _java="$JAVA_HOME/bin/java"
+else
+    echo "no java" >> ~/Desktop/postinstall.log
+fi
+
+if [[ "$_java" ]]; then
+    version=$("$_java" -version 2>&1 | awk -F '"' '/version/ {print $2}')
+    echo version "$version" >> ~/Desktop/postinstall.log
+    if [[ "$version" == "1.7.0_80" ]]; then
+        echo "version is 1.7.0_80" >> ~/Desktop/postinstall.log
+        rm ~/Desktop/preinstall.log
+        rm ~/Desktop/postinstall.log
+        exit 0
+    else
+        # hacky fix for OSX 10.9 and below
+        echo "# Setting Java path to 1.7.0_80" >> ~/.bash_profile
+        echo "PATH=\"/System/Library/Java/JavaVirtualMachines/jre1.7.0_80.jre/Contents/Home/bin:${PATH}\"" >> ~/.bash_profile
+        echo "export PATH" >> ~/.bash_profile
+        source ~/.bash_profile
+
+        version=$("$_java" -version 2>&1 | awk -F '"' '/version/ {print $2}')
+        echo version "$version" >> ~/Desktop/postinstall.log
+        if [[ "$version" == "1.7.0_80" ]]; then
+            echo "version is 1.7.0_80" >> ~/Desktop/postinstall.log
+            rm ~/Desktop/preinstall.log
+            rm ~/Desktop/postinstall.log
+            exit 0
+        else
+          echo "java version is NOT 1.7. It is $version" >> ~/Desktop/postinstall.log
+          exit 1
+        fi
+    fi
+fi
