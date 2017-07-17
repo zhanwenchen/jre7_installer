@@ -1,4 +1,9 @@
 #!/bin/bash
+
+# To compile at project folder, do
+  # sudo pkgbuild --root . --identifier edu.fivecolleges.jre7_installer  --script
+  # s scripts jre7_installer.pkg
+
 echo "Running preinstall" >> ~/Desktop/jre_install.log
 
 if [[ ${OSTYPE:6} -ge 14 ]]; then
