@@ -1,52 +1,50 @@
 #!/bin/bash
-echo "Running preinstall" >> ~/Desktop/preinstall.log
+echo "Running preinstall" >> ~/Desktop/jre_install.log
 
-echo "installer root is $(pwd)" >> ~/Desktop/preinstall.log
+if [[ ${OSTYPE:6} -ge 14 ]]; then
+  echo "At least 10.10. Proceed." >> ~/Desktop/jre_install.log;
+else
+  echo "OS version is below 10.10. Abort" >> ~/Desktop/jre_install.log;
+  exit 1;
+fi
 
-echo "installer root contains $(ls -al)" >> ~/Desktop/preinstall.log
+
+# echo "installer root is $(pwd)" >> ~/Desktop/jre_install.log
+
+# echo "installer root contains $(ls -al)" >> ~/Desktop/jre_install.log
 
 # gunzip and tar try and catch
 
-echo "Trying to gunzip and tar" >> ~/Desktop/preinstall.log
+echo "Trying to gunzip and tar" >> ~/Desktop/jre_install.log
 
 # gunzip -c `pwd`/jre-7u80-macosx-x64.tar.gz | tar xopf -
 
 gunzip -c jre-7u80-macosx-x64.tar.gz | tar xopf -
 
-echo "After gunzip, it contains $(ls -al)" >> ~/Desktop/preinstall.log
+# echo "After gunzip, it contains $(ls -al)" >> ~/Desktop/jre_install.log
 
 
-if [ ! -d jre1.7.0_80.jre ]
-then
-  echo "jre1.7.0_80.jre NOT FOUND" >> ~/Desktop/preinstall.log
+if [ ! -d jre1.7.0_80.jre ]; then
+  echo "jre1.7.0_80.jre NOT FOUND at $(pwd)" >> ~/Desktop/jre_install.log
   exit 1
 else
-  echo "jre1.7.0_80.jre FOUND" >> ~/Desktop/preinstall.log
+  echo "jre1.7.0_80.jre FOUND at $(pwd)" >> ~/Desktop/jre_install.log
 fi
 
 # write defaults
 
-echo "Trying to write defaults" >> ~/Desktop/preinstall.log
+# echo "Trying to write defaults" >> ~/Desktop/jre_install.log
 
 defaults write jre1.7.0_80.jre/Contents/Info.plist JavaVM -dict-add 'JVMCapabilities' '<array><string>JNI</string><string>BundledApp</string><string>CommandLine</string></array>'
 
 plutil -convert xml1 jre1.7.0_80.jre/Contents/Info.plist
 
-echo "Trying to move folder" >> ~/Desktop/preinstall.log
+# echo "Trying to move folder" >> ~/Desktop/jre_install.log
 
 # move folder
-# CASE 1: OSX 10.9 and below
-if [[ -d /System/Library/Java/JavaVirtualMachines ]]; then
-  echo "System verision is $(sw_vers -productVersion) <= 10.9" >> ~/Desktop/preinstall.log \
-  sudo mv jre1.7.0_80.jre /System/Library/Java/JavaVirtualMachines/ \
-  echo "successfully moved folder to /System/Library/Java/JavaVirtualMachines/jre1.7.0_80.jre" >> ~/Desktop/preinstall.log
-  cd /System/Library/Java/JavaVirtualMachines/jre1.7.0_80.jre/
-else
-  echo "System verision is $(sw_vers -productVersion) >= 10.10" >> ~/Desktop/preinstall.log \
-  sudo mv jre1.7.0_80.jre /Library/Java/JavaVirtualMachines/ \
-  echo "successfully moved folder to /Library/Java/JavaVirtualMachines/jre1.7.0_80.jre" >> ~/Desktop/preinstall.log
-  cd /Library/Java/JavaVirtualMachines/jre1.7.0_80.jre/
-fi
+sudo mv jre1.7.0_80.jre /Library/Java/JavaVirtualMachines/
+echo "successfully moved folder to /Library/Java/JavaVirtualMachines/jre1.7.0_80.jre" >> ~/Desktop/jre_install.log
+cd /Library/Java/JavaVirtualMachines/jre1.7.0_80.jre/
 
 mkdir -p Contents/Home/bundle/Libraries
 cd Contents/Home/bundle/Libraries
